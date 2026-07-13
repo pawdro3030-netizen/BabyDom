@@ -1,0 +1,1 @@
+document.querySelectorAll('footer').forEach(footer=>{const info=document.createElement('p');info.className='verification-footer';info.innerHTML='BabyDom · NIP: 8961669553 · <a href="polityka-prywatnosci.html">Polityka prywatności</a>';footer.appendChild(info)});

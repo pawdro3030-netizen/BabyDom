@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BabyDom – produkty dla dzieci, domu i zdrowia." />
+  <title>BabyDom | Dla dzieci, domu i zdrowia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="catalog.css" />
+  <link rel="stylesheet" href="cart.css" />
+  <link rel="stylesheet" href="delivery.css" />
+  <link rel="stylesheet" href="verification.css" />
+</head>
+<body>
+  <div class="announcement">Darmowa dostawa od 149 zł <span>•</span> Wysyłka we wtorki i piątki</div>
+  <header class="site-header">
+    <a class="brand" href="#start" aria-label="BabyDom – strona główna"><img src="assets/babydom-logo.png" alt="BabyDom" /></a>
+    <button class="menu-button" aria-label="Otwórz menu" aria-expanded="false">☰</button>
+    <nav aria-label="Główne menu">
+      <a href="#produkty">Produkty</a><a href="#dlaczego">Dlaczego BabyDom</a><a href="#kontakt">Kontakt</a>
+    </nav>
+    <button class="cart-button" id="open-cart" aria-label="Otwórz koszyk">Koszyk <span id="cart-count">0</span></button>
+  </header>
+
+  <main id="start">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Z troską o codzienność</p>
+        <h1>Dobro dla małych.<br><em>Spokój dla dużych.</em></h1>
+        <p class="hero-text">Starannie wybieramy produkty dla dzieci, domu i zdrowia — takie, które naprawdę warto mieć pod ręką.</p>
+        <a class="button button-primary" href="#produkty">Zobacz produkty <span>→</span></a>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="sun"></div><div class="cloud cloud-one"></div><div class="cloud cloud-two"></div>
+        <div class="house"><span class="roof"></span><span class="wall"></span><span class="heart">♥</span></div>
+        <div class="plant plant-one">⌇</div><div class="plant plant-two">⌇</div>
+        <p>dla dzieci, domu<br>i zdrowia</p>
+      </div>
+    </section>
+
+    <section class="benefits" id="dlaczego">
+      <article><span>✓</span><div><strong>Staranny wybór</strong><p>Produkty, którym sami ufamy.</p></div></article>
+      <article><span>♡</span><div><strong>Dla całej rodziny</strong><p>Od pierwszych dni życia.</p></div></article>
+      <article><span>↗</span><div><strong>Prosta dostawa</strong><p>Wygodnie, prosto pod Twoje drzwi.</p></div></article>
+    </section>
+
+    <section class="products" id="produkty">
+      <div class="section-heading"><div><p class="eyebrow">Pełny katalog</p><h2>Produkty z dobrym składem</h2></div><span class="catalog-count" id="catalog-count"></span></div>
+      <div class="catalog-tools"><label><span>Szukaj</span><input id="product-search" type="search" placeholder="np. kaszka, woda, kawa…" /></label><div id="category-filters" class="category-filters" aria-label="Kategorie produktów"></div></div>
+      <div class="product-grid catalog-grid" id="product-grid" aria-live="polite"></div>
+      <p class="product-note">Ceny, stany i zdjęcia pochodzą z eksportu Allegro z 13 lipca 2026 r.</p>
+    </section>
+
+    <section class="delivery-section"><div><p class="eyebrow">Dostawa BabyDom</p><h2>Prosto, przejrzyście, bez niespodzianek.</h2></div><div class="delivery-cards"><article><span>▣</span><strong>Paczkomat</strong><p>12,99 zł</p></article><article><span>⌂</span><strong>Kurier</strong><p>15,99 zł</p></article><article><span>♡</span><strong>Gratis od 149 zł</strong><p>Darmowa dostawa</p></article><article><span>◷</span><strong>Wysyłka</strong><p>Wtorki i piątki</p></article></div></section>
+    <section class="story"><div class="story-image"><span>♥</span></div><div><p class="eyebrow">BabyDom</p><h2>Małe decyzje, które robią wielką różnicę.</h2><p>W BabyDom znajdziesz wybrane produkty, które wspierają spokojną, zdrową codzienność rodziny. Bez przypadkowych wyborów. Z uważnością i sercem.</p><a class="text-link" href="#kontakt">Poznaj nas bliżej →</a></div></section>
+  </main>
+
+  <footer id="kontakt"><div class="footer-brand"><img src="assets/babydom-logo.png" alt="BabyDom" /><p>Dla dzieci, domu i zdrowia.</p></div><div><strong>Zakupy</strong><a href="#produkty">Produkty</a><a href="#dlaczego">O BabyDom</a></div><div><strong>Kontakt</strong><a href="mailto:BabyDomContaact@outlook.com">BabyDomContaact@outlook.com</a><a href="tel:+48601751289">601 751 289</a><a href="regulamin.html">Regulamin</a><a href="zwroty.html">Zwroty</a></div><p class="copyright">© 2026 BabyDom</p></footer>
+  <aside class="cart-panel" id="cart-panel" aria-hidden="true"><div class="cart-top"><h2>Twój koszyk</h2><button id="close-cart" aria-label="Zamknij koszyk">×</button></div><div id="cart-items"><p class="empty">Koszyk jest jeszcze pusty.</p></div><fieldset class="shipping"><legend>Dostawa</legend><label><input type="radio" name="shipping" value="paczkomat" checked> Paczkomat <b>12,99 zł</b></label><label><input type="radio" name="shipping" value="kurier"> Kurier <b>15,99 zł</b></label><small>Darmowa dostawa od 149 zł</small></fieldset><div class="cart-summary"><span>Produkty <b id="subtotal">0,00 zł</b></span><span>Dostawa <b id="shipping-cost">0,00 zł</b></span></div><div class="cart-total"><span>Razem</span><strong id="total">0,00 zł</strong></div><button class="button button-primary checkout" id="checkout">Przejdź do zamówienia →</button></aside><div class="overlay" id="overlay"></div>
+  <script src="catalog.js"></script><script src="script.js"></script><script src="site-footer.js"></script>
+</body>
+</html>
