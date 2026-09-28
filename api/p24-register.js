@@ -8,6 +8,10 @@ const sha384 = (o) =>
 const clean = (v, max = 120) =>
   String(v ?? "").trim().slice(0, max);
 
+const FREE_DELIVERY = 14900; // 149 zł w groszach
+const PACZKOMAT_PRICE = 1299;
+const COURIER_PRICE = 1599;
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -20,6 +24,7 @@ export default async function handler(req, res) {
     const merchantId = Number(
       process.env.P24_MERCHANT_ID || process.env.P24_POS_ID
     );
+
     const crc = process.env.P24_CRC;
     const apiKey = process.env.P24_API_KEY;
     const databaseUrl = process.env.DATABASE_URL;
@@ -49,6 +54,9 @@ export default async function handler(req, res) {
     const customer = req.body?.customer || {};
     const items = Array.isArray(req.body?.items) ? req.body.items : [];
 
+    const delivery =
+      req.body?.delivery === "kurier" ? "kurier" : "paczkomat";
+
     const email = clean(customer.email, 255);
     const name = clean(customer.name, 150);
     const phone = clean(customer.phone, 50);
@@ -69,13 +77,14 @@ export default async function handler(req, res) {
       });
     }
 
-    let amount = 0;
+    let productsAmount = 0;
     let count = 0;
     const orderItems = [];
 
     for (const row of items) {
       const id = Number(row.id);
       const qty = Math.max(1, Math.min(50, Number(row.qty) || 0));
+
       const product = catalog.find((x) => x.id === id);
 
       if (!product) {
@@ -87,7 +96,7 @@ export default async function handler(req, res) {
       const unitPrice = Math.round(product.price * 100);
       const lineTotal = unitPrice * qty;
 
-      amount += lineTotal;
+      productsAmount += lineTotal;
       count += qty;
 
       orderItems.push({
@@ -99,16 +108,39 @@ export default async function handler(req, res) {
       });
     }
 
-    if (amount < 1 || count > 100) {
+    if (productsAmount < 1 || count > 100) {
       return res.status(400).json({
         error: "Nieprawidłowa wartość koszyka.",
       });
     }
 
+    // Dostawa liczona wyłącznie po stronie serwera.
+    const shippingAmount =
+      productsAmount >= FREE_DELIVERY
+        ? 0
+        : delivery === "kurier"
+          ? COURIER_PRICE
+          : PACZKOMAT_PRICE;
+
+    const amount = productsAmount + shippingAmount;
+
+    orderItems.push({
+      id: "shipping",
+      name:
+        delivery === "kurier"
+          ? "Dostawa - Kurier"
+          : "Dostawa - Paczkomat",
+      qty: 1,
+      unitPrice: shippingAmount,
+      lineTotal: shippingAmount,
+    });
+
     const randomPart = crypto.randomBytes(5).toString("hex").toUpperCase();
 
     const sessionId = `BD-${Date.now()}-${randomPart}`;
-    const orderNumber = `BD-${Date.now()}-${randomPart.slice(0, 6)}`;
+    const orderNumber =
+      `BD-${Date.now()}-${randomPart.slice(0, 6)}`;
+
     const currency = "PLN";
 
     sql = postgres(databaseUrl, {
@@ -153,17 +185,22 @@ export default async function handler(req, res) {
       sessionId,
       amount,
       currency,
+
       description: `BabyDom - zamówienie ${orderNumber}`,
+
       email,
       client: name,
       address: street,
       zip: postalCode,
       city,
+
       country: "PL",
       language: "pl",
-      urlReturn: `${siteUrl}/?payment=return&sessionId=${encodeURIComponent(
-        sessionId
-      )}`,
+
+      urlReturn:
+        `${siteUrl}/?payment=return&sessionId=` +
+        encodeURIComponent(sessionId),
+
       urlStatus: `${siteUrl}/api/p24-status`,
     };
 
@@ -175,16 +212,20 @@ export default async function handler(req, res) {
       crc,
     });
 
-    const auth = Buffer.from(`${posId}:${apiKey}`).toString("base64");
+    const auth = Buffer.from(
+      `${posId}:${apiKey}`
+    ).toString("base64");
 
     const p24Response = await fetch(
       "https://sandbox.przelewy24.pl/api/v1/transaction/register",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
           Authorization: `Basic ${auth}`,
         },
+
         body: JSON.stringify(body),
       }
     );
@@ -209,10 +250,14 @@ export default async function handler(req, res) {
     return res.status(200).json({
       sessionId,
       orderNumber,
-      redirectUrl: `https://sandbox.przelewy24.pl/trnRequest/${encodeURIComponent(
-        data.data.token
-      )}`,
+      amount,
+      shippingAmount,
+
+      redirectUrl:
+        `https://sandbox.przelewy24.pl/trnRequest/` +
+        encodeURIComponent(data.data.token),
     });
+
   } catch (e) {
     console.error("p24-register error:", e);
 
@@ -220,6 +265,7 @@ export default async function handler(req, res) {
       error: "Błąd serwera podczas tworzenia płatności.",
       details: String(e?.message || e),
     });
+
   } finally {
     if (sql) {
       await sql.end().catch(() => {});
