@@ -8,19 +8,22 @@ const sha384 = (o) =>
 const clean = (v, max = 120) =>
   String(v ?? "").trim().slice(0, max);
 
-const FREE_DELIVERY = 14900; // 149 zł w groszach
-const PACZKOMAT_PRICE = 1299;
-const COURIER_PRICE = 1599;
+const FREE_DELIVERY = 14900; // 149 zł
+const PACZKOMAT_PRICE = 1299; // 12,99 zł
+const COURIER_PRICE = 1599; // 15,99 zł
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    return res.status(405).json({
+      error: "Method not allowed",
+    });
   }
 
   let sql;
 
   try {
     const posId = Number(process.env.P24_POS_ID);
+
     const merchantId = Number(
       process.env.P24_MERCHANT_ID || process.env.P24_POS_ID
     );
@@ -33,7 +36,10 @@ export default async function handler(req, res) {
       process.env.SITE_URL || `https://${req.headers.host}`
     ).replace(/\/$/, "");
 
-    if ((process.env.P24_MODE || "sandbox").toLowerCase() !== "sandbox") {
+    // Na razie działamy wyłącznie w Sandboxie
+    if (
+      (process.env.P24_MODE || "sandbox").toLowerCase() !== "sandbox"
+    ) {
       return res.status(503).json({
         error: "Ta wersja jest zablokowana na SANDBOX.",
       });
@@ -52,10 +58,15 @@ export default async function handler(req, res) {
     }
 
     const customer = req.body?.customer || {};
-    const items = Array.isArray(req.body?.items) ? req.body.items : [];
+
+    const items = Array.isArray(req.body?.items)
+      ? req.body.items
+      : [];
 
     const delivery =
-      req.body?.delivery === "kurier" ? "kurier" : "paczkomat";
+      req.body?.delivery === "kurier"
+        ? "kurier"
+        : "paczkomat";
 
     const email = clean(customer.email, 255);
     const name = clean(customer.name, 150);
@@ -79,13 +90,22 @@ export default async function handler(req, res) {
 
     let productsAmount = 0;
     let count = 0;
+
     const orderItems = [];
 
+    // Produkty i ceny pobieramy z katalogu na serwerze,
+    // a nie z wartości przesłanych przez przeglądarkę.
     for (const row of items) {
       const id = Number(row.id);
-      const qty = Math.max(1, Math.min(50, Number(row.qty) || 0));
 
-      const product = catalog.find((x) => x.id === id);
+      const qty = Math.max(
+        1,
+        Math.min(50, Number(row.qty) || 0)
+      );
+
+      const product = catalog.find(
+        (x) => x.id === id
+      );
 
       if (!product) {
         return res.status(400).json({
@@ -93,8 +113,12 @@ export default async function handler(req, res) {
         });
       }
 
-      const unitPrice = Math.round(product.price * 100);
-      const lineTotal = unitPrice * qty;
+      const unitPrice = Math.round(
+        product.price * 100
+      );
+
+      const lineTotal =
+        unitPrice * qty;
 
       productsAmount += lineTotal;
       count += qty;
@@ -108,13 +132,16 @@ export default async function handler(req, res) {
       });
     }
 
-    if (productsAmount < 1 || count > 100) {
+    if (
+      productsAmount < 1 ||
+      count > 100
+    ) {
       return res.status(400).json({
         error: "Nieprawidłowa wartość koszyka.",
       });
     }
 
-    // Dostawa liczona wyłącznie po stronie serwera.
+    // Dostawa jest liczona po stronie serwera.
     const shippingAmount =
       productsAmount >= FREE_DELIVERY
         ? 0
@@ -122,32 +149,42 @@ export default async function handler(req, res) {
           ? COURIER_PRICE
           : PACZKOMAT_PRICE;
 
-    const amount = productsAmount + shippingAmount;
+    const amount =
+      productsAmount + shippingAmount;
 
     orderItems.push({
       id: "shipping",
+
       name:
         delivery === "kurier"
           ? "Dostawa - Kurier"
           : "Dostawa - Paczkomat",
+
       qty: 1,
       unitPrice: shippingAmount,
       lineTotal: shippingAmount,
     });
 
-    const randomPart = crypto.randomBytes(5).toString("hex").toUpperCase();
+    const randomPart =
+      crypto.randomBytes(5)
+        .toString("hex")
+        .toUpperCase();
 
-    const sessionId = `BD-${Date.now()}-${randomPart}`;
+    const sessionId =
+      `BD-${Date.now()}-${randomPart}`;
+
     const orderNumber =
       `BD-${Date.now()}-${randomPart.slice(0, 6)}`;
 
     const currency = "PLN";
 
+    // Połączenie z bazą
     sql = postgres(databaseUrl, {
       ssl: "require",
       max: 1,
     });
 
+    // Zapisujemy zamówienie przed wysłaniem do P24
     await sql`
       INSERT INTO orders (
         order_number,
@@ -186,7 +223,8 @@ export default async function handler(req, res) {
       amount,
       currency,
 
-      description: `BabyDom - zamówienie ${orderNumber}`,
+      description:
+        `BabyDom - zamówienie ${orderNumber}`,
 
       email,
       client: name,
@@ -197,13 +235,17 @@ export default async function handler(req, res) {
       country: "PL",
       language: "pl",
 
+      // Po płatności klient wraca na tę stronę.
       urlReturn:
-        `${siteUrl}/?payment=return&sessionId=` +
+        `${siteUrl}/payment-return.html?sessionId=` +
         encodeURIComponent(sessionId),
 
-      urlStatus: `${siteUrl}/api/p24-status`,
+      // P24 wysyła tutaj informację o płatności.
+      urlStatus:
+        `${siteUrl}/api/p24-status`,
     };
 
+    // Podpis rejestracji transakcji
     body.sign = sha384({
       sessionId,
       merchantId,
@@ -212,27 +254,36 @@ export default async function handler(req, res) {
       crc,
     });
 
-    const auth = Buffer.from(
-      `${posId}:${apiKey}`
-    ).toString("base64");
+    const auth =
+      Buffer.from(
+        `${posId}:${apiKey}`
+      ).toString("base64");
 
-    const p24Response = await fetch(
-      "https://sandbox.przelewy24.pl/api/v1/transaction/register",
-      {
-        method: "POST",
+    const p24Response =
+      await fetch(
+        "https://sandbox.przelewy24.pl/api/v1/transaction/register",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Basic ${auth}`,
-        },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${auth}`,
+          },
 
-        body: JSON.stringify(body),
-      }
-    );
+          body: JSON.stringify(body),
+        }
+      );
 
-    const data = await p24Response.json().catch(() => ({}));
+    const data =
+      await p24Response
+        .json()
+        .catch(() => ({}));
 
-    if (!p24Response.ok || !data?.data?.token) {
+    // Jeżeli P24 odrzuci utworzenie transakcji
+    if (
+      !p24Response.ok ||
+      !data?.data?.token
+    ) {
       await sql`
         UPDATE orders
         SET
@@ -242,11 +293,14 @@ export default async function handler(req, res) {
       `;
 
       return res.status(502).json({
-        error: "Przelewy24 odrzuciło rejestrację transakcji.",
+        error:
+          "Przelewy24 odrzuciło rejestrację transakcji.",
+
         details: data,
       });
     }
 
+    // Wszystko OK — frontend przekieruje klienta do P24
     return res.status(200).json({
       sessionId,
       orderNumber,
@@ -255,15 +309,23 @@ export default async function handler(req, res) {
 
       redirectUrl:
         `https://sandbox.przelewy24.pl/trnRequest/` +
-        encodeURIComponent(data.data.token),
+        encodeURIComponent(
+          data.data.token
+        ),
     });
 
   } catch (e) {
-    console.error("p24-register error:", e);
+    console.error(
+      "p24-register error:",
+      e
+    );
 
     return res.status(500).json({
-      error: "Błąd serwera podczas tworzenia płatności.",
-      details: String(e?.message || e),
+      error:
+        "Błąd serwera podczas tworzenia płatności.",
+
+      details:
+        String(e?.message || e),
     });
 
   } finally {
