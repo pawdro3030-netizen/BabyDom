@@ -14,9 +14,11 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="/BabyDom-strona/styles.css">
-
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       background: #fffafc;
@@ -31,11 +33,17 @@
       text-align: center;
     }
 
+    .payment-logo-link {
+      display: inline-block;
+      text-decoration: none;
+    }
+
     .payment-header img {
+      display: block;
       width: 150px;
       max-width: 45vw;
       height: auto;
-      display: inline-block;
+      margin: 0 auto;
     }
 
     .payment-page {
@@ -44,7 +52,6 @@
       align-items: center;
       justify-content: center;
       padding: 40px 20px;
-      box-sizing: border-box;
     }
 
     .payment-card {
@@ -54,7 +61,6 @@
       border: 1px solid #f0e3e9;
       border-radius: 28px;
       padding: 48px 36px;
-      box-sizing: border-box;
       text-align: center;
       box-shadow: 0 18px 60px rgba(80, 45, 65, 0.08);
     }
@@ -79,6 +85,7 @@
     }
 
     .payment-card p {
+      margin: 0;
       color: #6d6269;
       line-height: 1.65;
       font-size: 16px;
@@ -112,7 +119,7 @@
       font-weight: 700;
       background: #ee8eae;
       color: #fff;
-      transition: transform .15s ease;
+      transition: transform 0.15s ease;
     }
 
     .payment-button:hover {
@@ -126,7 +133,7 @@
       border: 4px solid #f3dfe7;
       border-top-color: #ee8eae;
       border-radius: 50%;
-      animation: spin .8s linear infinite;
+      animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
@@ -147,19 +154,28 @@
 <body>
 
   <header class="payment-header">
-    <a href="/BabyDom-strona/index.html">
+
+    <a
+      href="https://baby-dom.vercel.app/"
+      class="payment-logo-link"
+      aria-label="BabyDom - strona główna"
+    >
       <img
-        src="/BabyDom-strona/assets/babydom-logo.png"
+        src="https://baby-dom.vercel.app/BabyDom-strona/assets/babydom-logo.png"
         alt="BabyDom"
       >
     </a>
+
   </header>
 
   <main class="payment-page">
 
     <section class="payment-card">
 
-      <div class="status-icon" id="status-icon">
+      <div
+        class="status-icon"
+        id="status-icon"
+      >
         ⏳
       </div>
 
@@ -172,15 +188,21 @@
         prawidłowo potwierdzona przez Przelewy24.
       </p>
 
-      <div class="order-box" id="order-box">
+      <div
+        class="order-box"
+        id="order-box"
+      >
         <span>Numer zamówienia</span>
         <strong id="order-number"></strong>
       </div>
 
-      <div class="loader" id="loader"></div>
+      <div
+        class="loader"
+        id="loader"
+      ></div>
 
       <a
-        href="/BabyDom-strona/index.html"
+        href="https://baby-dom.vercel.app/"
         class="payment-button"
         id="return-button"
         style="display:none"
@@ -193,22 +215,39 @@
   </main>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("sessionId");
+    const params =
+      new URLSearchParams(window.location.search);
 
-    const icon = document.querySelector("#status-icon");
-    const title = document.querySelector("#status-title");
-    const text = document.querySelector("#status-text");
-    const loader = document.querySelector("#loader");
+    const sessionId =
+      params.get("sessionId");
 
-    const orderBox = document.querySelector("#order-box");
-    const orderNumber = document.querySelector("#order-number");
-    const returnButton = document.querySelector("#return-button");
+    const icon =
+      document.querySelector("#status-icon");
+
+    const title =
+      document.querySelector("#status-title");
+
+    const text =
+      document.querySelector("#status-text");
+
+    const loader =
+      document.querySelector("#loader");
+
+    const orderBox =
+      document.querySelector("#order-box");
+
+    const orderNumber =
+      document.querySelector("#order-number");
+
+    const returnButton =
+      document.querySelector("#return-button");
 
     let attempts = 0;
+
     const maxAttempts = 15;
 
     function showError(message) {
+
       icon.textContent = "!";
 
       title.textContent =
@@ -218,11 +257,15 @@
         message ||
         "Jeśli płatność została wykonana, skontaktuj się z nami przed ponowną próbą zapłaty.";
 
-      loader.style.display = "none";
-      returnButton.style.display = "inline-block";
+      loader.style.display =
+        "none";
+
+      returnButton.style.display =
+        "inline-block";
     }
 
     function showPaid(order) {
+
       icon.textContent = "✓";
 
       title.textContent =
@@ -232,6 +275,7 @@
         "Płatność została potwierdzona. Twoje zamówienie zostało przyjęte do realizacji.";
 
       if (order.orderNumber) {
+
         orderNumber.textContent =
           order.orderNumber;
 
@@ -239,40 +283,55 @@
           "block";
       }
 
-      loader.style.display = "none";
-      returnButton.style.display = "inline-block";
+      loader.style.display =
+        "none";
+
+      returnButton.style.display =
+        "inline-block";
 
       /*
-        Koszyk usuwamy dopiero po potwierdzeniu
-        statusu PAID przez nasz serwer.
+        Koszyk czyścimy dopiero po potwierdzeniu
+        statusu PAID przez serwer.
       */
-      localStorage.removeItem("babydom-cart");
-      localStorage.removeItem("babydom-last-order");
+
+      localStorage.removeItem(
+        "babydom-cart"
+      );
+
+      localStorage.removeItem(
+        "babydom-last-order"
+      );
     }
 
     async function checkPayment() {
+
       if (!sessionId) {
+
         showError(
           "Brakuje identyfikatora zamówienia."
         );
+
         return;
       }
 
       attempts++;
 
       try {
-        const response = await fetch(
-          "/api/order-status?sessionId=" +
-          encodeURIComponent(sessionId),
-          {
-            cache: "no-store"
-          }
-        );
+
+        const response =
+          await fetch(
+            "/api/order-status?sessionId=" +
+            encodeURIComponent(sessionId),
+            {
+              cache: "no-store"
+            }
+          );
 
         const data =
           await response.json();
 
         if (!response.ok) {
+
           throw new Error(
             data.error ||
             "Nie udało się sprawdzić zamówienia."
@@ -280,6 +339,7 @@
         }
 
         if (data.orderNumber) {
+
           orderNumber.textContent =
             data.orderNumber;
 
@@ -291,7 +351,9 @@
           data.paid === true ||
           data.status === "paid"
         ) {
+
           showPaid(data);
+
           return;
         }
 
@@ -299,11 +361,14 @@
           Callback z Przelewy24 może dotrzeć
           chwilę po powrocie klienta.
         */
+
         if (attempts < maxAttempts) {
+
           setTimeout(
             checkPayment,
             2000
           );
+
           return;
         }
 
@@ -315,20 +380,26 @@
         text.textContent =
           "Nie otrzymaliśmy jeszcze ostatecznego potwierdzenia płatności. Nie wykonuj ponownej płatności. Status zamówienia może zostać zaktualizowany po chwili.";
 
-        loader.style.display = "none";
-        returnButton.style.display = "inline-block";
+        loader.style.display =
+          "none";
+
+        returnButton.style.display =
+          "inline-block";
 
       } catch (error) {
+
         console.error(
           "Payment status error:",
           error
         );
 
         if (attempts < maxAttempts) {
+
           setTimeout(
             checkPayment,
             2000
           );
+
           return;
         }
 
