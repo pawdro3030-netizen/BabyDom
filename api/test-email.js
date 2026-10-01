@@ -25,41 +25,126 @@ export default async function handler(req, res) {
         },
 
         body: JSON.stringify({
+          // Dopóki nie mamy własnej zweryfikowanej domeny,
+          // korzystamy z testowego nadawcy Resend.
           from: "BabyDom <onboarding@resend.dev>",
 
+          // W trybie testowym Resend pozwala wysyłać
+          // tylko na adres właściciela konta.
           to: [
-            "BabyDomContaact@outlook.com"
+            "babydomcontaact@outlook.com"
           ],
 
           subject: "Test e-mail BabyDom",
 
           html: `
-            <div style="
-              font-family: Arial, sans-serif;
-              max-width: 600px;
-              margin: 0 auto;
-              padding: 30px;
-            ">
+            <!doctype html>
+            <html lang="pl">
+              <body
+                style="
+                  margin:0;
+                  padding:0;
+                  background:#fff8fb;
+                  font-family:Arial,Helvetica,sans-serif;
+                  color:#2c2630;
+                "
+              >
 
-              <h1 style="color:#ee8eae;">
-                BabyDom
-              </h1>
+                <div
+                  style="
+                    max-width:600px;
+                    margin:0 auto;
+                    padding:40px 20px;
+                  "
+                >
 
-              <h2>
-                Test wysyłki działa 🎉
-              </h2>
+                  <div
+                    style="
+                      background:#ffffff;
+                      border:1px solid #f0e3e9;
+                      border-radius:24px;
+                      padding:40px 30px;
+                      text-align:center;
+                    "
+                  >
 
-              <p>
-                Ten e-mail został wysłany z serwera
-                BabyDom działającego na Vercel.
-              </p>
+                    <div
+                      style="
+                        width:70px;
+                        height:70px;
+                        line-height:70px;
+                        margin:0 auto 25px;
+                        border-radius:50%;
+                        background:#f8edf2;
+                        font-size:32px;
+                      "
+                    >
+                      ✓
+                    </div>
 
-              <p>
-                Jeśli widzisz tę wiadomość,
-                integracja Resend działa poprawnie.
-              </p>
+                    <h1
+                      style="
+                        margin:0 0 20px;
+                        font-size:32px;
+                        color:#2c2630;
+                      "
+                    >
+                      BabyDom
+                    </h1>
 
-            </div>
+                    <h2
+                      style="
+                        margin:0 0 16px;
+                        font-size:24px;
+                        color:#2c2630;
+                      "
+                    >
+                      Test wysyłki działa 🎉
+                    </h2>
+
+                    <p
+                      style="
+                        margin:0 0 15px;
+                        font-size:16px;
+                        line-height:1.6;
+                        color:#6d6269;
+                      "
+                    >
+                      To jest testowa wiadomość wysłana
+                      z serwera sklepu BabyDom działającego
+                      na Vercel.
+                    </p>
+
+                    <p
+                      style="
+                        margin:0;
+                        font-size:16px;
+                        line-height:1.6;
+                        color:#6d6269;
+                      "
+                    >
+                      Jeśli widzisz tę wiadomość,
+                      integracja BabyDom z Resend
+                      działa poprawnie.
+                    </p>
+
+                  </div>
+
+                  <p
+                    style="
+                      text-align:center;
+                      margin-top:20px;
+                      font-size:12px;
+                      color:#9a8e94;
+                    "
+                  >
+                    BabyDom
+                  </p>
+
+                </div>
+
+              </body>
+            </html>
           `,
         }),
       }
