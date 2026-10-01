@@ -14,7 +14,7 @@
     rel="stylesheet"
   >
 
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/BabyDom-strona/styles.css">
 
   <style>
     body {
@@ -34,6 +34,8 @@
     .payment-header img {
       width: 150px;
       max-width: 45vw;
+      height: auto;
+      display: inline-block;
     }
 
     .payment-page {
@@ -145,8 +147,11 @@
 <body>
 
   <header class="payment-header">
-    <a href="index.html">
-      <img src="assets/babydom-logo.png" alt="BabyDom">
+    <a href="/BabyDom-strona/index.html">
+      <img
+        src="/BabyDom-strona/assets/babydom-logo.png"
+        alt="BabyDom"
+      >
     </a>
   </header>
 
@@ -175,7 +180,7 @@
       <div class="loader" id="loader"></div>
 
       <a
-        href="index.html"
+        href="/BabyDom-strona/index.html"
         class="payment-button"
         id="return-button"
         style="display:none"
@@ -205,7 +210,9 @@
 
     function showError(message) {
       icon.textContent = "!";
-      title.textContent = "Nie udało się potwierdzić płatności";
+
+      title.textContent =
+        "Nie udało się potwierdzić płatności";
 
       text.textContent =
         message ||
@@ -218,22 +225,26 @@
     function showPaid(order) {
       icon.textContent = "✓";
 
-      title.textContent = "Dziękujemy za zamówienie!";
+      title.textContent =
+        "Dziękujemy za zamówienie!";
 
       text.textContent =
         "Płatność została potwierdzona. Twoje zamówienie zostało przyjęte do realizacji.";
 
       if (order.orderNumber) {
-        orderNumber.textContent = order.orderNumber;
-        orderBox.style.display = "block";
+        orderNumber.textContent =
+          order.orderNumber;
+
+        orderBox.style.display =
+          "block";
       }
 
       loader.style.display = "none";
       returnButton.style.display = "inline-block";
 
       /*
-        Koszyk czyścimy dopiero wtedy,
-        gdy serwer potwierdzi status PAID.
+        Koszyk usuwamy dopiero po potwierdzeniu
+        statusu PAID przez nasz serwer.
       */
       localStorage.removeItem("babydom-cart");
       localStorage.removeItem("babydom-last-order");
@@ -241,7 +252,9 @@
 
     async function checkPayment() {
       if (!sessionId) {
-        showError("Brakuje identyfikatora zamówienia.");
+        showError(
+          "Brakuje identyfikatora zamówienia."
+        );
         return;
       }
 
@@ -256,35 +269,48 @@
           }
         );
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
         if (!response.ok) {
           throw new Error(
-            data.error || "Nie udało się sprawdzić zamówienia."
+            data.error ||
+            "Nie udało się sprawdzić zamówienia."
           );
         }
 
         if (data.orderNumber) {
-          orderNumber.textContent = data.orderNumber;
-          orderBox.style.display = "block";
+          orderNumber.textContent =
+            data.orderNumber;
+
+          orderBox.style.display =
+            "block";
         }
 
-        if (data.paid === true || data.status === "paid") {
+        if (
+          data.paid === true ||
+          data.status === "paid"
+        ) {
           showPaid(data);
           return;
         }
 
         /*
-          P24 może wysłać callback chwilę po powrocie
-          klienta na stronę, dlatego próbujemy ponownie.
+          Callback z Przelewy24 może dotrzeć
+          chwilę po powrocie klienta.
         */
         if (attempts < maxAttempts) {
-          setTimeout(checkPayment, 2000);
+          setTimeout(
+            checkPayment,
+            2000
+          );
           return;
         }
 
         icon.textContent = "⏳";
-        title.textContent = "Płatność jest przetwarzana";
+
+        title.textContent =
+          "Płatność jest przetwarzana";
 
         text.textContent =
           "Nie otrzymaliśmy jeszcze ostatecznego potwierdzenia płatności. Nie wykonuj ponownej płatności. Status zamówienia może zostać zaktualizowany po chwili.";
@@ -293,10 +319,16 @@
         returnButton.style.display = "inline-block";
 
       } catch (error) {
-        console.error("Payment status error:", error);
+        console.error(
+          "Payment status error:",
+          error
+        );
 
         if (attempts < maxAttempts) {
-          setTimeout(checkPayment, 2000);
+          setTimeout(
+            checkPayment,
+            2000
+          );
           return;
         }
 
