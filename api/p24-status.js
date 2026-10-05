@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import postgres from "postgres";
+import { sendOrderEmails } from "../lib/order-emails.js";
 
 const sha384 = (o) =>
   crypto.createHash("sha384").update(JSON.stringify(o)).digest("hex");
@@ -43,7 +44,7 @@ export default async function handler(req, res) {
       crc,
     });
 
-    if (!n.sign || expectedSign !== n.sign) {
+    if (Number(n.posId) !== posId || Number(n.merchantId) !== merchantId || !n.sign || expectedSign !== n.sign) {
       return res.status(400).send("Invalid sign");
     }
 
@@ -120,6 +121,12 @@ export default async function handler(req, res) {
         updated_at = NOW()
       WHERE session_id = ${String(n.sessionId)}
     `;
+
+    try {
+      await sendOrderEmails(sql, String(n.sessionId));
+    } catch (error) {
+      console.error("Order email failed (retry in admin panel):", error.message);
+    }
 
     return res.status(200).send("OK");
   } catch (e) {

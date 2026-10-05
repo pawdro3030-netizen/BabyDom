@@ -68,6 +68,8 @@ export default async function handler(req, res) {
         ? "kurier"
         : "paczkomat";
 
+    const lockerCode = delivery === "paczkomat" ? clean(customer.lockerCode, 30).toUpperCase() : null;
+
     const email = clean(customer.email, 255);
     const name = clean(customer.name, 150);
     const phone = clean(customer.phone, 50);
@@ -76,7 +78,9 @@ export default async function handler(req, res) {
     const city = clean(customer.city, 100);
 
     if (
-      !email.includes("@") ||
+      ! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+      !phone ||
+      (delivery === "paczkomat" && !/^[A-Z0-9]{3,30}$/.test(lockerCode || "")) ||
       !name ||
       !street ||
       !postalCode ||
@@ -98,10 +102,10 @@ export default async function handler(req, res) {
     for (const row of items) {
       const id = Number(row.id);
 
-      const qty = Math.max(
-        1,
-        Math.min(50, Number(row.qty) || 0)
-      );
+      const qty = Number(row.qty);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 50) {
+        return res.status(400).json({error: "Nieprawidłowa ilość produktu."});
+      }
 
       const product = catalog.find(
         (x) => x.id === id
@@ -196,6 +200,8 @@ export default async function handler(req, res) {
         street,
         postal_code,
         city,
+        delivery,
+        locker_code,
         items,
         amount,
         currency
@@ -210,6 +216,8 @@ export default async function handler(req, res) {
         ${street},
         ${postalCode},
         ${city},
+        ${delivery},
+        ${lockerCode},
         ${sql.json(orderItems)},
         ${amount},
         ${currency}
