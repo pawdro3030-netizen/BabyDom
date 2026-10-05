@@ -54,6 +54,9 @@ if (!cart.length) {
     }${shipping === 0 ? ' — dostawa bezpłatna' : ''}. ` +
     `Wysyłka we wtorki i piątki.`;
 
+  const locker = document.querySelector('[name=lockerCode]');
+  locker.required = delivery === 'paczkomat';
+  document.querySelector('#locker-label').hidden = !locker.required;
   const form = document.querySelector('#order-form');
   const submitButton = form.querySelector('button[type="submit"]');
 
@@ -72,7 +75,8 @@ if (!cart.length) {
       phone: formData.get('phone'),
       street: formData.get('street'),
       postalCode: formData.get('postcode'),
-      city: formData.get('city')
+      city: formData.get('city'),
+      lockerCode: formData.get('lockerCode')
     };
 
     const items = cart.map(item => ({
