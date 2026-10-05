@@ -41,7 +41,7 @@ search.addEventListener('input',doSearch);function searchFor(q){search.value=q;d
 function add(id){let r=cart.find(x=>x.id===id);r?r.qty++:cart.push({id,qty:1});save();toast('Produkt dodany do koszyka ✓')}
 function qty(id,d){let r=cart.find(x=>x.id===id);if(!r)return;r.qty+=d;if(r.qty<1)cart=cart.filter(x=>x.id!==id);save()}
 function save(){localStorage.setItem('bd-cart',JSON.stringify(cart));renderCart()}
-function renderCart(){let count=cart.reduce((s,x)=>s+x.qty,0),sum=cart.reduce((s,x)=>s+(P.find(p=>p.id===x.id)?.price||0)*x.qty,0);cartCount.textContent=count;cartItems.innerHTML=cart.map(x=>{let p=P.find(y=>y.id===x.id);return `<div class="cartitem"><div><b>${p.name}</b><br><small>${money(p.price)} / szt.</small></div><div class="qty"><button onclick="qty(${p.id},-1)">−</button><b>${x.qty}</b><button onclick="qty(${p.id},1)">+</button></div></div>`}).join('')||'<p>Koszyk jest pusty.</p>';total.textContent=money(sum);ship.textContent='Dostawa zostanie skonfigurowana po testach płatności';cartProgress.style.width='100%'}
+function renderCart(){let count=cart.reduce((s,x)=>s+x.qty,0),sum=cart.reduce((s,x)=>s+(P.find(p=>p.id===x.id)?.price||0)*x.qty,0);cartCount.textContent=count;cartItems.innerHTML=cart.map(x=>{let p=P.find(y=>y.id===x.id);return `<div class="cartitem"><div><b>${p.name}</b><br><small>${money(p.price)} / szt.</small></div><div class="qty"><button onclick="qty(${p.id},-1)">−</button><b>${x.qty}</b><button onclick="qty(${p.id},1)">+</button></div></div>`}).join('')||'<p>Koszyk jest pusty.</p>';total.textContent=money(sum);ship.textContent=sum>=149?'Darmowa dostawa':`Do darmowej dostawy brakuje ${money(149-sum)}`;cartProgress.style.width=Math.min(100,sum/149*100)+'%'}
 function toggleCart(){drawer.classList.toggle('open');shade.classList.toggle('open')}
 function openModal(id){let p=P.find(x=>x.id===id);let desc=p.description||'Pełny opis produktu jest w trakcie uzupełniania. Dane, których nie ma w eksporcie Bio Planet, będą dodawane z kolejnych źródeł.';modal.innerHTML=`<div class="modalCard"><button class="x" onclick="closeModal()">×</button><div class="modalPic">${p.image?`<img class="modalRealImg" src="${p.image}" alt="${p.name}">`:pack(p)}</div><div><span class="kicker">${p.brand} • ${p.cat}</span><h2>${p.name}</h2><span class="badge" style="position:static;display:inline-block">${p.tag}</span>${p.ean?`<p class="productMeta"><b>EAN:</b> ${p.ean}</p>`:''}<div class="desc">${desc}</div><div class="modalPrice">${money(p.price)}</div><button class="add" style="padding:14px 24px" onclick="add(${p.id});closeModal()">Dodaj do koszyka</button></div></div>`;modal.classList.add('open')}
 function openCheckout(){
@@ -62,6 +62,9 @@ function openCheckout(){
           <input name="postalCode" required autocomplete="postal-code" pattern="[0-9]{2}-[0-9]{3}" style="padding:13px;border:1px solid #ddd;border-radius:10px" placeholder="00-000">
           <input name="city" required autocomplete="address-level2" style="padding:13px;border:1px solid #ddd;border-radius:10px" placeholder="Miasto">
         </div>
+        <label>Dostawa <select name="delivery" id="deliveryChoice"><option value="paczkomat">Paczkomat — 12,99 zł</option><option value="kurier">Kurier — 15,99 zł</option></select></label>
+        <label id="lockerLabel">Kod paczkomatu InPost <input name="lockerCode" required pattern="[A-Za-z0-9]{3,30}" placeholder="np. WRO01M"></label>
+        <p class="detail">Darmowa dostawa od 149 zł. Wysyłka we wtorki i piątki.</p>
         <label style="display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.45;margin-top:5px">
           <input name="terms" type="checkbox" required style="margin-top:3px">
           <span>Akceptuję <button type="button" onclick="openLegal('regulamin')" style="border:0;background:none;padding:0;color:#168d82;text-decoration:underline;cursor:pointer">Regulamin sklepu</button> i zapoznałem/am się z <button type="button" onclick="openLegal('prywatnosc')" style="border:0;background:none;padding:0;color:#168d82;text-decoration:underline;cursor:pointer">Polityką prywatności</button>.</span>
@@ -73,12 +76,15 @@ function openCheckout(){
     <div style="background:#f7faf7;border-radius:16px;padding:22px">
       <h3>Podsumowanie</h3><div id="checkoutItems"></div>
       <hr style="border:0;border-top:1px solid #dde5dd">
-      <p><b>Dostawa:</b> 0,00 zł <small>(test SANDBOX)</small></p>
-      <p style="font-size:20px"><b>Razem:</b><b style="float:right">${money(sum)}</b></p>
+      <p><b>Dostawa:</b> <span id="checkoutShipping"></span></p>
+      <p style="font-size:20px"><b>Razem:</b><b style="float:right"><span id="checkoutTotal"></span></b></p>
       <p style="font-size:11px;color:#667">Kwota produktów jest ponownie liczona na serwerze.</p>
     </div>
   </div>`;
   modal.classList.add('open');
+  const choice=document.getElementById('deliveryChoice'), locker=document.querySelector('[name=lockerCode]');
+  function updateDelivery(){const shipping=sum>=149?0:choice.value==='kurier'?15.99:12.99;document.getElementById('checkoutShipping').textContent=money(shipping);document.getElementById('checkoutTotal').textContent=money(sum+shipping);locker.required=choice.value==='paczkomat';document.getElementById('lockerLabel').hidden=!locker.required;}
+  choice.onchange=updateDelivery;updateDelivery();
   document.getElementById('checkoutItems').innerHTML=cart.map(x=>{let p=P.find(y=>y.id===x.id);return `<p style="font-size:12px">${x.qty}× ${p.name}<b style="float:right">${money(p.price*x.qty)}</b></p>`}).join('');
 }
 async function startP24(ev){
@@ -86,7 +92,7 @@ async function startP24(ev){
   const form=ev.currentTarget, btn=document.getElementById('payBtn'), err=document.getElementById('payError');
   err.textContent='';btn.disabled=true;btn.textContent='Łączenie z Przelewy24…';
   const fd=new FormData(form);
-  const payload={customer:{name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),street:fd.get('street'),postalCode:fd.get('postalCode'),city:fd.get('city')},items:cart.map(x=>({id:x.id,qty:x.qty}))};
+  const payload={customer:{name:fd.get('name'),email:fd.get('email'),phone:fd.get('phone'),street:fd.get('street'),postalCode:fd.get('postalCode'),city:fd.get('city'),lockerCode:fd.get('lockerCode')},delivery:fd.get('delivery'),items:cart.map(x=>({id:x.id,qty:x.qty}))};
   try{
     const r=await fetch('/api/p24-register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
     const data=await r.json();
