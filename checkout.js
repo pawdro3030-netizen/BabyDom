@@ -49,7 +49,7 @@ async function syncPrices(){
   const override=map.get(Number(item.id));
   if(override){
    item.price=override.priceCents/100;
-   item.available=override.available!==false;
+   item.available=override.available!==false&&!unavailableDefaults.has(Number(item.id));
   }else{
    item.available=!unavailableDefaults.has(Number(item.id));
   }
