@@ -16,7 +16,7 @@ test('sklep oraz panel mają prawidłową składnię JavaScript', () => {
   }
 });
 test('endpointy i moduł danych mają poprawną składnię',()=>{
-  for(const path of ['api/admin-products.js','api/products.js','api/p24-register.js','lib/product-overrides.js']){
+  for(const path of ['api/admin-products.js','api/products.js','api/p24-register.js','lib/product-overrides.js','checkout.js']){
     execFileSync(process.execPath,['--check',new URL('../'+path,import.meta.url).pathname],{stdio:'pipe'});
   }
 });
@@ -46,4 +46,6 @@ test('koszyk i serwer weryfikują ceny oraz dostępność',()=>{
   assert.ok(html.includes('expectedUnitPrice'));
   assert.ok(backend.includes('settings?.available === false'));
   assert.ok(backend.includes('row.expectedUnitPrice !== unitPrice'));
+  assert.ok(file('checkout.js').includes('expectedUnitPrice'));
+  assert.ok(file('checkout.js').includes("fetch('/api/products'"));
 });
