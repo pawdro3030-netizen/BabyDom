@@ -129,7 +129,7 @@ export default async function handler(req, res) {
       }
 
       const settings = productSettings.get(product.id);
-      if (settings?.available === false) {
+      if (settings?.available === false || (!settings && product.available === false)) {
         return res.status(409).json({error:"Produkt jest obecnie niedostępny. Zaktualizuj koszyk."});
       }
       const unitPrice = settings ? settings.priceCents : Math.round(product.price * 100);
