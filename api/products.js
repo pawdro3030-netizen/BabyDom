@@ -1,4 +1,5 @@
 import postgres from 'postgres';
+import { catalog } from './_catalog.js';
 import { readProductOverrides } from '../lib/product-overrides.js';
 
 export default async function handler(req, res) {
@@ -15,7 +16,7 @@ export default async function handler(req, res) {
       if (e.code !== '42P01') throw e; // brak tabeli: domyślne ceny i dostępność
       overrides = [];
     }
-    return res.status(200).json({overrides});
+    return res.status(200).json({overrides, defaultUnavailable:catalog.filter(p=>p.available===false).map(p=>p.id)});
   } catch(e) {
     console.error('products:',e.message);
     return res.status(503).json({error:'Nie można obecnie sprawdzić cen i dostępności.'});
