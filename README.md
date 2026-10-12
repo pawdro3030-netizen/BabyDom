@@ -39,3 +39,11 @@ Sklep pobiera aktualne ustawienia z `/api/products` przy otwarciu strony, a przy
 
 **Ważne:** dostępność jest ustawiana ręcznie, bez automatycznej synchronizacji z hurtownią. Po wdrożeniu trzeba sprawdzić logowanie, zmianę ceny/dostępności i działanie koszyka na wersji produkcyjnej. Płatności P24 pozostają w sandbox i wymagają osobnego uruchomienia.
 
+
+## Etap 1 UX sklepu (październik 2026)
+
+- Katalog domyślnie pokazuje oferty dostępne, ma filtr marki, przełącznik dostępności i wyszukiwanie po EAN.
+- Koszyk poleca maksymalnie trzy uzupełniające produkty, z pominięciem ofert niedostępnych, już zakupionych oraz mleka modyfikowanego.
+- Geowidget InPost przekazuje kod i fizyczny adres wybranego punktu. Adres z mapy wypełnia dotychczasowe pola zamówienia bez ponownego pytania o adres domowy. Dla kuriera oraz niepełnych danych punktu pola adresowe pozostają wymagane.
+- Nie zmieniono cen, dostępności, progów dostaw ani integracji Przelewy24; płatności pozostają w sandbox.
+- Uruchom `node --test tests/product-admin.test.js`, by sprawdzić również filtry, rekomendacje oraz zachowanie formularza.
