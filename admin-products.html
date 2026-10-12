@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Produkty i ceny | BabyDom</title>
+<style>
+:root{--green:#347449;--dark:#1d2d24;--muted:#64746a;--line:#e1e9e1;--bg:#f5f8f4}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,Arial,sans-serif;color:var(--dark)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px max(18px,calc((100vw - 1180px)/2))}
+header strong{font-size:22px;color:var(--green)}header span{color:var(--muted);margin-left:10px;font-size:14px}
+main{max-width:1180px;margin:24px auto 60px;padding:0 18px}
+h1{font-size:clamp(24px,3vw,34px);margin:4px 0 8px}p{color:var(--muted);line-height:1.5}
+.box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin:18px 0}
+#login{max-width:460px}.login-fields{display:flex;gap:8px;flex-wrap:wrap}
+input,button,select{font:inherit}input[type=password],input[type=search],input[type=text],select{border:1px solid #cbd7cc;border-radius:9px;padding:11px;min-width:0;background:#fff}
+input[type=password]{flex:1}button{border:0;background:var(--green);color:white;padding:11px 15px;border-radius:10px;font-weight:650;cursor:pointer}button:disabled{cursor:not-allowed;opacity:.55}button.secondary{background:#eaf3e9;color:var(--green)}button.ghost{background:#fff;color:var(--green);border:1px solid var(--line)}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0}
+.toolbar input{width:min(520px,100%);flex:1}.toolbar select{width:200px}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 145px 158px 105px;gap:16px;align-items:center;padding:16px 18px;border:1px solid var(--line);border-radius:13px;background:#fff;margin:10px 0}
+.product-name{font-weight:650;line-height:1.4}.product-id{font-size:12px;color:var(--muted);margin-top:5px}
+.row label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px}
+.row input[type=text]{width:100%;padding:9px}
+.stock-control{display:flex;gap:9px;align-items:center;font-size:14px;cursor:pointer}
+.stock-control input{accent-color:var(--green);width:20px;height:20px}
+.stock-label{font-size:13px;font-weight:650}
+.status{min-height:28px;font-size:14px;margin:10px 0;color:var(--green)}
+.help{font-size:13px;color:var(--muted)}
+a{color:var(--green)}.toplinks{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:16px}
+@media(max-width:740px){.row{grid-template-columns:1fr 1fr;gap:12px}.product-info{grid-column:1/-1}.row .save{grid-column:1/-1}.row .save button{width:100%}.box{padding:17px}}
+</style>
+</head>
+<body>
+<header><strong>♡ BabyDom</strong><span>Panel administracyjny</span></header>
+<main>
+  <h1>Zarządzanie produktami</h1>
+  <p>Zmieniaj ceny i dostępność produktów bez edytowania kodu strony.</p>
+  <section class="box" id="login">
+    <h2>Logowanie</h2>
+    <p>Użyj tego samego hasła ADMIN_TOKEN, co w panelu zamówień.</p>
+    <form id="loginForm" class="login-fields">
+      <input type="password" id="password" placeholder="Hasło administratora" autocomplete="current-password" required>
+      <button type="submit">Zaloguj się</button>
+    </form>
+  </section>
+  <section id="panel" hidden>
+    <div class="toplinks">
+      <a href="/admin.html">← Panel zamówień</a>
+      <button type="button" class="secondary" id="reload">Odśwież</button>
+      <button type="button" class="ghost" id="logout">Wyloguj</button>
+    </div>
+    <p class="help">Po naciśnięciu „Zapisz” zmiany trafiają do bazy Neon. Klienci zobaczą je po odświeżeniu strony, a otwarte strony sprawdzają zmiany co 30 sekund. Sklep zawsze ponownie kontroluje cenę i dostępność przy składaniu zamówienia.</p>
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="Szukaj po nazwie lub numerze produktu…">
+      <select id="filter" aria-label="Filtr dostępności">
+        <option value="all">Wszystkie produkty</option>
+        <option value="available">Dostępne</option>
+        <option value="unavailable">Niedostępne</option>
+      </select>
+    </div>
+    <p id="count"></p>
+    <div id="products"></div>
+  </section>
+  <p id="message" class="status" role="status" aria-live="polite"></p>
+</main>
+<script type="module">
+let token='',products=[];
+const $=id=>document.getElementById(id);
+function el(tag,text,className=''){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(className)e.className=className;return e}
+function money(cents){return (cents/100).toLocaleString('pl-PL',{style:'currency',currency:'PLN'})}
+function status(text,error=false){$('message').textContent=text;$('message').style.color=error?'#ae3939':'#347449'}
+async function api(method='GET',payload){
+  const response=await fetch('/api/admin-products',{method,headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:payload?JSON.stringify(payload):undefined,cache:'no-store'});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Błąd połączenia z serwerem ('+response.status+').');
+  return data;
+}
+function draw(){
+  const term=$('search').value.toLocaleLowerCase('pl').trim(),filter=$('filter').value;
+  const selected=products.filter(p=>(filter==='all'||(filter==='available'?p.available:!p.available))&&
+    (p.name.toLocaleLowerCase('pl').includes(term)||String(p.id).includes(term)));
+  $('count').textContent=products.length+' produktów · '+products.filter(p=>p.available).length+' dostępnych · '+products.filter(p=>!p.available).length+' niedostępnych · wyświetlono '+selected.length;
+  const list=$('products');list.replaceChildren();
+  if(!selected.length){list.append(el('p','Nie znaleziono produktów.'));return}
+  for(const p of selected){
+    const row=el('article',undefined,'row'),info=el('div',undefined,'product-info');
+    info.append(el('div',p.name,'product-name'),el('div','Produkt #'+p.id,'product-id'));
+    const pricing=el('div');pricing.append(el('label','Cena brutto (zł)'));
+    const price=el('input');price.type='text';price.inputMode='decimal';price.value=(p.priceCents/100).toFixed(2).replace('.',',');price.setAttribute('aria-label','Cena '+p.name);pricing.append(price);
+    const availability=el('div');availability.append(el('label','Dostępność'));
+    const checkLabel=el('label',undefined,'stock-control'),check=el('input');check.type='checkbox';check.checked=p.available;
+    const indicator=el('span',p.available?'Dostępny':'Niedostępny','stock-label');
+    check.addEventListener('change',()=>{indicator.textContent=check.checked?'Dostępny':'Niedostępny'});
+    checkLabel.append(check,indicator);availability.append(checkLabel);
+    const saveArea=el('div',undefined,'save'),save=el('button','Zapisz');save.type='button';saveArea.append(save);
+    save.addEventListener('click',async()=>{
+      const raw=price.value.trim();
+      if(!/^\d{1,6}([,.]\d{1,2})?$/.test(raw)){status('Wpisz poprawną cenę brutto, np. 19,99 zł.',true);price.focus();return}
+      const priceCents=Math.round(Number(raw.replace(',','.'))*100);
+      if(priceCents<1||priceCents>99999999){status('Cena musi być większa od zera.',true);return}
+      save.disabled=true;save.textContent='Zapisuję…';
+      try{
+        const response=await api('PUT',{id:p.id,priceCents,available:check.checked});
+        p.priceCents=response.product.priceCents;p.available=response.product.available;
+        status('Zapisano: '+p.name+' — '+money(p.priceCents)+' — '+(p.available?'dostępny':'niedostępny'));
+        draw();
+      }catch(e){status(e.message,true);save.disabled=false;save.textContent='Ponów zapis'}
+    });
+    row.append(info,pricing,availability,saveArea);list.append(row);
+  }
+}
+async function load(){
+  status('Wczytuję produkty…');
+  try{const data=await api();products=data.products;$('login').hidden=true;$('panel').hidden=false;draw();status('Produkty gotowe do edycji.')}
+  catch(e){status(e.message,true)}
+}
+$('loginForm').addEventListener('submit',e=>{e.preventDefault();token=$('password').value;$('password').value='';load()});
+$('search').addEventListener('input',draw);
+$('filter').addEventListener('change',draw);
+$('reload').addEventListener('click',load);
+$('logout').addEventListener('click',()=>{token='';products=[];$('panel').hidden=true;$('login').hidden=false;$('products').replaceChildren();status('Wylogowano.');});
+</script>
+</body>
+</html>
