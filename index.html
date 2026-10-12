@@ -31,17 +31,19 @@
 .drawer{display:flex;flex-direction:column;overflow:hidden;gap:7px}
 .drawerHead{flex-shrink:0}
 #cartItems{overflow-y:auto;flex:1;min-height:60px}
-.cartRecommendations{max-height:250px;overflow-y:auto;flex-shrink:0;border:1px solid #deebdf;border-radius:13px;background:#f8fbf8;padding:12px}
+.cartRecommendations{max-height:min(410px,48vh);overflow-y:auto;flex-shrink:0;border:1px solid #deebdf;border-radius:15px;background:#f8fbf8;padding:16px}
 .cartRecommendations[hidden]{display:none}
-.cartRecommendations h4{margin:0 0 3px;font-size:14px;color:var(--gd)}
-.cartRecHint{font-size:11px;color:#637665;margin:0 0 8px}
-.cartRecRow{display:flex;gap:9px;align-items:center;padding:8px 0;border-top:1px solid #e5eee6}
-.cartRecRow img,.recPlaceholder{width:42px;height:42px;flex-shrink:0;object-fit:contain;background:#fff;border-radius:7px}
-.recPlaceholder{display:grid;place-items:center}
-.cartRecText{min-width:0;flex:1;display:grid;gap:2px;font-size:11px;line-height:1.3}
-.cartRecText span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-.cartRecText b{color:var(--gd)}
-.cartRecRow button{background:var(--g);color:#fff;border:0;border-radius:8px;padding:8px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.cartRecommendations h4{margin:0 0 5px;font-size:17px;color:var(--gd)}
+.cartRecHint{font-size:13px;line-height:1.4;color:#637665;margin:0 0 12px}
+.cartRecRow{display:flex;gap:12px;align-items:center;padding:13px 0;border-top:1px solid #e5eee6}
+.cartRecRow img,.recPlaceholder{width:76px;height:76px;flex-shrink:0;object-fit:contain;background:#fff;border-radius:11px;border:1px solid #e6eee6;padding:5px}
+.recPlaceholder{display:grid;place-items:center;font-size:26px;color:var(--g)}
+.cartRecText{min-width:0;flex:1;display:grid;gap:7px;font-size:13px;line-height:1.4}
+.cartRecText span{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;font-weight:600}
+.cartRecText b{color:var(--gd);font-size:16px}
+.cartRecRow button{background:var(--g);color:#fff;border:0;border-radius:9px;padding:12px 13px;min-height:44px;font-size:13px;font-weight:800;cursor:pointer;white-space:nowrap}
+.cartRecRow button:hover{background:var(--gd)}
+.drawer{width:min(480px,96vw)}
 .drawer>.checkout,.drawer>.total,.drawer>.ship,.drawer>.cartprogress{flex-shrink:0}
 .drawer>.total{padding:7px 0}
 .drawer>.checkout{margin-top:2px}
@@ -49,7 +51,7 @@
 .deliveryAddress{display:grid;gap:9px}
 .deliveryAddress[hidden]{display:none}
 @media(max-width:850px){.checkoutCard{grid-template-columns:1fr}.brandFilter{max-width:none}}
-@media(max-width:520px){.toolbar .select{margin-left:0}.stockFilter{order:2}.brandFilter{order:3}.drawer{padding:16px}.cartRecommendations{max-height:210px}}
+@media(max-width:520px){.toolbar .select{margin-left:0}.stockFilter{order:2}.brandFilter{order:3}.drawer{padding:16px}.cartRecommendations{max-height:min(360px,44vh);padding:12px}.cartRecRow{gap:9px;padding:11px 0}.cartRecRow img,.recPlaceholder{width:60px;height:60px}.cartRecText{font-size:12px}.cartRecText b{font-size:14px}.cartRecRow button{font-size:12px;padding:9px;min-height:42px}}
 </style><script src="/inpost-picker.js" defer></script><script src="/delivery-address.js" defer></script></head><body>
 <div class="top"><span>🚚 Dostawa od 12,99 zł &nbsp; • &nbsp; 🛡 Bezpieczne zakupy &nbsp; • &nbsp; 🌿 Starannie wybrane produkty</span><span class="links"><a href="mailto:BabyDomContaact@outlook.com" style="color:inherit;text-decoration:none">Kontakt</a><a href="#" onclick="openLegal('dostawa');return false" style="color:inherit;text-decoration:none">Dostawa i płatności</a><a href="#" onclick="openLegal('reklamacje');return false" style="color:inherit;text-decoration:none">Pomoc</a></span></div>
 <div class="wrap"><header class="head"><a class="logo" href="#"><span class="heart">♡</span><span><strong>BabyDom</strong><small>Dla małych i dużych</small></span></a><div class="search"><input id="search" placeholder="Czego szukasz? np. Holle, kaszka, mus..."><button onclick="doSearch()">⌕</button></div><div class="actions"><a class="action hideMob" href="mailto:BabyDomContaact@outlook.com" style="text-decoration:none">✉ Kontakt</a><button class="action" onclick="toggleCart()">🛒 Koszyk <span class="cartnum" id="cartCount">0</span></button></div></header></div>
