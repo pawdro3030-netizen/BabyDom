@@ -105,7 +105,7 @@
         locker.readOnly = false;
         info.textContent = 'Mapa jest chwilowo niedostępna. Możesz wpisać kod punktu ręcznie.';
         button.textContent = '📍 Otwórz mapę InPost ↗';
-        button.onclick = () => window.open('https://inpost.pl/znajdz-paczkomat','_blank','noopener,noreferrer');
+        // Następne kliknięcie otworzy zewnętrzną mapę w trybie ręcznym.
       } finally {
         button.disabled = false;
       }
