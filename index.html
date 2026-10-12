@@ -53,7 +53,7 @@ async function refreshCatalog(){
     if(!r.ok)throw new Error('Nie można sprawdzić dostępności.');
     const d=await r.json();if(!Array.isArray(d.overrides))throw new Error('Nieprawidłowa odpowiedź katalogu.');
     P.forEach(p=>{p.price=BASE_PRICES.get(p.id)/100;p.available=BASE_AVAILABLE.get(p.id)});
-    for(const row of d.overrides){const p=PRODUCTS_BY_ID.get(row.id);if(p){if(Number.isSafeInteger(row.priceCents)&&row.priceCents>0)p.price=row.priceCents/100;p.available=row.available!==false}}
+    for(const row of d.overrides){const p=PRODUCTS_BY_ID.get(row.id);if(p){if(Number.isSafeInteger(row.priceCents)&&row.priceCents>0)p.price=row.priceCents/100;p.available=BASE_AVAILABLE.get(p.id)&&row.available!==false}}
     catalogReady=true;render();renderCart();return true;
    }catch(e){console.error('Katalog:',e);catalogReady=false;render();renderCart();return false}
  })();
