@@ -76,6 +76,10 @@
     document.addEventListener('onpointselect',window.__bdInpostPointListener);
 
     button.addEventListener('click', async () => {
+      if (!locker.readOnly) {
+        window.open('https://inpost.pl/znajdz-paczkomat','_blank','noopener,noreferrer');
+        return;
+      }
       if (!map.hidden) {
         map.hidden = true;
         button.textContent = locker.value ? '📍 Zmień paczkomat' : '📍 Wybierz paczkomat na mapie';
