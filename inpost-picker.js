@@ -68,7 +68,21 @@
       locker.value = code;
       locker.dispatchEvent(new Event('input',{bubbles:true}));
       const address = point.address || {};
-      const line = address.line1 || [address.street,address.building_number].filter(Boolean).join(' ');
+      const details = point.address_details || {};
+      const line = address.line1 || [details.street,details.building_number].filter(Boolean).join(' ');
+      // InPost Geowidget: address_details zawiera adres wybranego punktu.
+      // Formularz nie musi prosić ponownie o domowy adres przy paczkomacie.
+      locker.dispatchEvent(new CustomEvent('inpost-point-selected',{
+        bubbles:true,
+        detail:{
+          code,
+          address:{
+            street:line || '',
+            postalCode:details.post_code || '',
+            city:details.city || ''
+          }
+        }
+      }));
       info.textContent = '✓ Wybrany punkt: ' + code + (line ? ' — ' + line : '');
       map.hidden = true;
       button.textContent = '📍 Zmień paczkomat';

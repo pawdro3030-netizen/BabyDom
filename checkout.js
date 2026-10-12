@@ -13,6 +13,9 @@ form.insertBefore(notice,submitButton);
 const locker=document.querySelector('[name=lockerCode]');
 locker.required=delivery==='paczkomat';
 document.querySelector('#locker-label').hidden=!locker.required;
+// InPost dostarcza adres wybranego punktu; przy kurierze klient wpisuje swój.
+const addressController=window.setupBabyDomDeliveryAddress?.(form);
+addressController?.setDelivery(delivery);
 if (window.setupInpostPicker) window.setupInpostPicker(document.querySelector('#locker-label'));
 function shippingPrice(subtotal){return subtotal>=149?0:delivery==='kurier'?15.99:12.99}
 function renderSummary(){
