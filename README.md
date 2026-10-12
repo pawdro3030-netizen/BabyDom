@@ -28,3 +28,14 @@ Przejście P24 na produkcję wymaga osobnej zmiany endpointów i kluczy oraz rze
 
 ## Lokalne testy
 `node --test tests/order-operations.test.js`
+
+## Panel produktów i cen
+
+Adres: `/admin-products.html` (również link z `/admin.html`). Logowanie za pomocą istniejącego `ADMIN_TOKEN` z Vercel Environment Variables, minimum 32 znaki. Hasło nie jest zapisywane w pamięci trwałej przeglądarki.
+
+Po pierwszym logowaniu panel automatycznie tworzy tabelę `product_overrides` w bazie Neon (alternatywnie można uruchomić `002-product-overrides.sql`). W panelu zmienisz cenę brutto oraz przełączysz produkt między dostępnym a niedostępnym. Ustawienia pozostają w Neon i **nie wymagają commitów GitHub**.
+
+Sklep pobiera aktualne ustawienia z `/api/products` przy otwarciu strony, a przy pozostawieniu otwartej karty odświeża je co 30 sekund. Dodanie do koszyka niedostępnego produktu jest blokowane. `/api/p24-register` bezwzględnie sprawdza aktualną cenę i dostępność w Neon oraz odmawia przyjęcia zamówienia, którego cena zmieniła się od wyświetlenia klientowi. Awaria odczytu katalogu blokuje zakup zamiast potajemnie używać starej ceny.
+
+**Ważne:** dostępność jest ustawiana ręcznie, bez automatycznej synchronizacji z hurtownią. Po wdrożeniu trzeba sprawdzić logowanie, zmianę ceny/dostępności i działanie koszyka na wersji produkcyjnej. Płatności P24 pozostają w sandbox i wymagają osobnego uruchomienia.
+
