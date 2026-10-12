@@ -1,0 +1,20 @@
+name: BabyDom checks
+on:
+  push:
+    branches:
+      - babydom-product-admin-20261012
+  pull_request:
+    branches:
+      - main
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check JavaScript and catalog
+        run: node --test tests/product-admin.test.js
