@@ -30,6 +30,7 @@ export default async function handler(req,res) {
     if (!Number.isInteger(id)||!catalog.some(p=>p.id===id)) return res.status(400).json({error:'Nieznany produkt.'});
     if (!Number.isSafeInteger(priceCents)||priceCents<1||priceCents>99999999) return res.status(400).json({error:'Nieprawidłowa cena.'});
     if (typeof available!=='boolean') return res.status(400).json({error:'Nieprawidłowa dostępność.'});
+    if (available && catalog.find(p=>p.id===id)?.available===false) return res.status(409).json({error:'Oferta wstrzymana po kontroli dostawcy. Ponowna aktywacja wymaga aktualizacji danych BioPlanet.'});
     const rows=await sql`
       INSERT INTO product_overrides (product_id,price_cents,available,updated_at)
       VALUES (${id},${priceCents},${available},NOW())
