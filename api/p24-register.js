@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import postgres from "postgres";
 import { catalog } from "./_catalog.js";
+import { readProductOverrides } from "../lib/product-overrides.js";
 
 const sha384 = (o) =>
   crypto.createHash("sha384").update(JSON.stringify(o)).digest("hex");
@@ -92,6 +93,16 @@ export default async function handler(req, res) {
       });
     }
 
+    // Aktualne ceny i dostępność sprawdzane są zawsze na serwerze.
+    sql = postgres(databaseUrl,{ssl:"require",max:1});
+    let overrides = [];
+    try {
+      overrides = await readProductOverrides(sql);
+    } catch(e) {
+      if(e.code!=='42P01') throw e; // pierwsze uruchomienie przed zmianą w panelu
+    }
+    const productSettings = new Map(overrides.map(x=>[x.id,x]));
+
     let productsAmount = 0;
     let count = 0;
 
@@ -117,9 +128,15 @@ export default async function handler(req, res) {
         });
       }
 
-      const unitPrice = Math.round(
-        product.price * 100
-      );
+      const settings = productSettings.get(product.id);
+      if (settings?.available === false) {
+        return res.status(409).json({error:"Produkt jest obecnie niedostępny. Zaktualizuj koszyk."});
+      }
+      const unitPrice = settings ? settings.priceCents : Math.round(product.price * 100);
+      // Klient musi zobaczyć i zaakceptować aktualną cenę przed przejściem do płatności.
+      if (!Number.isSafeInteger(row.expectedUnitPrice) || row.expectedUnitPrice !== unitPrice) {
+        return res.status(409).json({error:"Cena produktu zmieniła się. Odśwież koszyk i spróbuj ponownie."});
+      }
 
       const lineTotal =
         unitPrice * qty;
@@ -181,12 +198,6 @@ export default async function handler(req, res) {
       `BD-${Date.now()}-${randomPart.slice(0, 6)}`;
 
     const currency = "PLN";
-
-    // Połączenie z bazą
-    sql = postgres(databaseUrl, {
-      ssl: "require",
-      max: 1,
-    });
 
     // Zapisujemy zamówienie przed wysłaniem do P24
     await sql`
