@@ -21,7 +21,58 @@
 <section class="section"><div class="promoGrid"><div class="promo p1"><h3>Dla najmłodszych</h3><p>Dobry start w życie — kaszki, musy, mleka i obiadki.</p><button class="primary" onclick="filterCat('Kaszki')">Zobacz →</button><b class="art">👶🏻</b></div><div class="promo p2"><h3>Zdrowa żywność</h3><p>Herbaty, kawa, produkty BIO i więcej dla całej rodziny.</p><button class="primary" onclick="filterCat('Herbaty')">Sprawdź →</button><b class="art">🍵</b></div><div class="promo p3"><h3>Świąteczne</h3><p>Kalendarze adwentowe, figurki i sezonowe zestawy.</p><button class="primary" onclick="filterCat('Świąteczne')">Zobacz →</button><b class="art">🎄</b></div></div></section>
 <div class="trust"><div><i>🚚</i><b>Darmowa dostawa<small>od 149 zł</small></b></div><div><i>🛡</i><b>Bezpieczne zakupy<small>przejrzyste zasady</small></b></div><div><i>📦</i><b>Szybka wysyłka<small>sprawna realizacja</small></b></div><div><i>🌿</i><b>Starannie wybrane<small>produkty BIO</small></b></div><div><i>♡</i><b>Mała firma<small>wspierasz BabyDom</small></b></div></div>
 <div class="newsletter"><div style="font-size:30px">✉</div><div><strong>Dołącz do newslettera</strong><br><span>Nowości, promocje i zdrowe inspiracje.</span></div><div class="email"><input placeholder="Twój adres e-mail"><button onclick="toast('Dziękujemy! Formularz demonstracyjny.')">Zapisz się</button></div></div></main>
-<footer class="footer"><div class="wrap"><div class="footgrid"><div><a class="logo" href="#"><span class="heart">♡</span><span><strong>BabyDom</strong><small>Dla małych i dużych</small></span></a><p>Zdrowa żywność dla dzieci, produkty BIO, herbaty, kosmetyki i sezonowe perełki.</p></div><div><h4>Zakupy</h4><a>Dostawa</a><a>Płatności</a><a>Zwroty i reklamacje</a><a>Regulamin</a></div><div><h4>Informacje</h4><a>O nas</a><a>Kontakt</a><a>Polityka prywatności</a></div><div><h4>Moje konto</h4><a>Zaloguj się</a><a>Ulubione</a><a>Historia zamówień</a></div><div><h4>Popularne</h4><a>Holle</a><a>Kaszki</a><a>Obiadki</a><a>Herbaty</a></div></div><div class="legal-links"><button onclick="openLegal('regulamin')">Regulamin sklepu</button><button onclick="openLegal('prywatnosc')">Polityka prywatności</button><button onclick="openLegal('zwroty')">Zwroty i odstąpienie</button><button onclick="openLegal('reklamacje')">Reklamacje</button><button onclick="openLegal('dostawa')">Dostawa i płatności</button><button onclick="openLegal('cookies')">Ustawienia cookies</button></div><div class="compliance">Dokumenty sklepu uzupełnione o dane przedsiębiorcy BabyDom. Przed uruchomieniem sprzedaży należy jeszcze wskazać faktycznie wdrożonego operatora płatności, dostawy oraz używane narzędzia analityczne i marketingowe.</div><div style="margin:18px 0;padding:14px 16px;border:1px solid #dde5dd;border-radius:14px;font-size:12px;line-height:1.6"><b>BabyDom Paweł Drozdowski</b><br>NIP: 8961669553<br>ul. św. Floriana 1, 55-080 Smolec<br>tel. +48 601 751 289 · BabyDomContaact@outlook.com</div><div class="copyright">© 2026 BabyDom • wersja robocza sklepu • katalog roboczy: 87 aktywnych ofert odwzorowanych z BabyDom • zdjęcia i opisy zasilane danymi produktowymi Bio Planet tam, gdzie znaleziono zgodność EAN.</div></div></footer>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footgrid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:28px">
+
+      <div>
+        <a class="logo" href="#">
+          <span class="heart">♡</span>
+          <span>
+            <strong>BabyDom</strong>
+            <small>Dla małych i dużych</small>
+          </span>
+        </a>
+        <p>
+          Zdrowa żywność dla dzieci, produkty BIO,
+          herbaty, kosmetyki i sezonowe perełki.
+        </p>
+      </div>
+
+      <div>
+        <h4>Pomoc i informacje</h4>
+        <div class="legal-links">
+          <button onclick="openLegal('regulamin')">Regulamin sklepu</button>
+          <button onclick="openLegal('prywatnosc')">Polityka prywatności</button>
+          <button onclick="openLegal('zwroty')">Zwroty i odstąpienie</button>
+          <button onclick="openLegal('reklamacje')">Reklamacje</button>
+          <button onclick="openLegal('dostawa')">Dostawa i płatności</button>
+          <button onclick="openLegal('cookies')">Ustawienia cookies</button>
+        </div>
+      </div>
+
+      <div>
+        <h4>Dane firmy i kontakt</h4>
+        <p>
+          <b>BabyDom Paweł Drozdowski</b><br>
+          NIP: 8961669553<br>
+          ul. św. Floriana 1, 55-080 Smolec<br>
+          tel. <a href="tel:+48601751289">+48 601 751 289</a>
+          <a href="mailto:BabyDomContaact@outlook.com">
+            BabyDomContaact@outlook.com
+          </a>
+        </p>
+      </div>
+
+    </div>
+
+    <div class="copyright">
+      © 2026 BabyDom. Wszelkie prawa zastrzeżone.
+    </div>
+  </div>
+</footer>
+
 <div class="drawer" id="drawer"><div class="drawerHead"><h3>Twój koszyk</h3><button onclick="toggleCart()">×</button></div><div id="cartItems"></div><div class="ship" id="ship"></div><div class="cartprogress"><i id="cartProgress"></i></div><div class="total"><span>Razem</span><b id="total">0,00 zł</b></div><button class="checkout" onclick="openCheckout()">Przejdź do zamówienia</button></div><div class="shade" id="shade" onclick="toggleCart()"></div><div class="modal" id="modal" onclick="if(event.target===this)closeModal()"></div><div class="toast" id="toast"></div>
 <div class="legalbar" id="legalbar"><div class="legalwrap"><button class="legalclose" onclick="closeLegal()">✕ Zamknij</button><div id="legalcontent"></div></div></div>
 <div class="cookiebox" id="cookiebox"><p><b>Twoja prywatność</b><br>BabyDom używa niezbędnych plików cookies do działania sklepu. Analityczne i marketingowe mogą zostać uruchomione dopiero po Twojej zgodzie. Ustawienia możesz później zmienić w stopce.</p><div class="cookieactions"><button class="no" onclick="setCookies('necessary')">Tylko niezbędne</button><button class="yes" onclick="setCookies('all')">Akceptuję wszystkie</button></div></div><script>
