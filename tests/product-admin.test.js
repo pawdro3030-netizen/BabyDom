@@ -52,7 +52,7 @@ test('koszyk i serwer weryfikują ceny oraz dostępność',()=>{
 
 test('blokady dostawcy są jednakowe w sklepie, panelu i serwerze',()=>{
   const storefront=file('index.html');
-  const frontend=JSON.parse(storefront.match(/const P=(\\[[^\\n]*\\]);/)[1]);
+  const frontend=JSON.parse(storefront.match(/const P=(\[[^\n]*\]);/)[1]);
   const suspended=frontend.filter(p=>p.available===false);
   assert.equal(suspended.length,24);
   for(const p of frontend) {
@@ -66,7 +66,7 @@ test('blokady dostawcy są jednakowe w sklepie, panelu i serwerze',()=>{
 });
 
 test('ceny po aktualizacji BioPlanet pozostają spójne',()=>{
-  const frontend=JSON.parse(file('index.html').match(/const P=(\\[[^\\n]*\\]);/)[1]);
+  const frontend=JSON.parse(file('index.html').match(/const P=(\[[^\n]*\]);/)[1]);
   for(const [id,price] of [[1,13.19],[3,8.19],[25,12.79],[67,50.34],[107,15.79]]) {
     assert.equal(frontend.find(p=>p.id===id).price,price);
     assert.equal(catalog.find(p=>p.id===id).price,price);
