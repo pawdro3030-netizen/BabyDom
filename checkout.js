@@ -13,6 +13,7 @@ form.insertBefore(notice,submitButton);
 const locker=document.querySelector('[name=lockerCode]');
 locker.required=delivery==='paczkomat';
 document.querySelector('#locker-label').hidden=!locker.required;
+if (window.setupInpostPicker) window.setupInpostPicker(document.querySelector('#locker-label'));
 function shippingPrice(subtotal){return subtotal>=149?0:delivery==='kurier'?15.99:12.99}
 function renderSummary(){
  const subtotal=cart.reduce((sum,x)=>sum+Number(x.price||0)*x.qty,0);
@@ -43,13 +44,14 @@ async function syncPrices(){
  const data=await response.json();
  if(!Array.isArray(data.overrides))throw new Error('Nieprawidłowe dane katalogu.');
  const map=new Map(data.overrides.map(x=>[x.id,x]));
+ const unavailableDefaults=new Set(Array.isArray(data.defaultUnavailable)?data.defaultUnavailable.map(Number):[]);
  for(const item of cart){
   const override=map.get(Number(item.id));
   if(override){
    item.price=override.priceCents/100;
-   item.available=override.available!==false;
+   item.available=override.available!==false&&!unavailableDefaults.has(Number(item.id));
   }else{
-   item.available=true;
+   item.available=!unavailableDefaults.has(Number(item.id));
   }
  }
  catalogReady=true;renderSummary();
