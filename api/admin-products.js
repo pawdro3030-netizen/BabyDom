@@ -20,7 +20,7 @@ export default async function handler(req,res) {
           id:p.id,
           name:p.name,
           priceCents:override?override.priceCents:Math.round(p.price*100),
-          available:override?override.available:p.available!==false,
+          available:p.available===false?false:(override?override.available:true),
           updatedAt:override?.updatedAt||null
         };
       });
